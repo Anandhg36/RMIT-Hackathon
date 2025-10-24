@@ -35,7 +35,7 @@ async def signup_user(name: str, email: str, api_token: str ,password : str):
         if existing_user.data:
             raise HTTPException(status_code=400, detail="User with this email already exists")
         
-        user_id = email.split('@')[0]
+        user_id = int(str(email.split('@')[0])[1:])
         # Insert new user
         new_user = {
             "user_id": user_id,
