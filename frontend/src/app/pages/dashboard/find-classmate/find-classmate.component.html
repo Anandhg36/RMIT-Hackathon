@@ -1,0 +1,65 @@
+<div class="form-container">
+  <h2>Enter Your Course Details</h2>
+
+  <!-- Show while waiting for mock API -->
+  <div *ngIf="!loading" class="loading">
+    <p>Loading course list...</p>
+  </div>
+
+  <!-- Show the form once data arrives -->
+  <form *ngIf=true (ngSubmit)="saveDetails()">
+    <div *ngFor="let course of courses; let i = index" class="course-block">
+      <h3>{{ course.name }}</h3>
+
+      <div class="course-partition">
+        <!-- Theory -->
+        <div class="section theory">
+          <h4>Theory</h4>
+          <input
+            type="text"
+            [(ngModel)]="course.theory.day"
+            name="theoryDay{{ i }}"
+            placeholder="Day"
+          />
+          <input
+            type="text"
+            [(ngModel)]="course.theory.time"
+            name="theoryTime{{ i }}"
+            placeholder="Time"
+          />
+          <input
+            type="text"
+            [(ngModel)]="course.theory.classroom"
+            name="theoryClassroom{{ i }}"
+            placeholder="Classroom"
+          />
+        </div>
+
+        <!-- Practical -->
+        <div class="section practical">
+          <h4>Practical</h4>
+          <input
+            type="text"
+            [(ngModel)]="course.practical.day"
+            name="practicalDay{{ i }}"
+            placeholder="Day"
+          />
+          <input
+            type="text"
+            [(ngModel)]="course.practical.time"
+            name="practicalTime{{ i }}"
+            placeholder="Time"
+          />
+          <input
+            type="text"
+            [(ngModel)]="course.practical.classroom"
+            name="practicalClassroom{{ i }}"
+            placeholder="Classroom"
+          />
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="save-btn">Save</button>
+  </form>
+</div>

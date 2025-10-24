@@ -1,0 +1,54 @@
+<div class="dash-wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">RMIT<span>ONE</span></div>
+
+    <nav class="nav">
+      <div class="nav-group">MENU</div>
+      <a
+        class="nav-item"
+        routerLink="/dashboard/find-classmate"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="dot"></span>
+        <span>Find Classmate</span>
+      </a>
+
+      <a
+        class="nav-item"
+        routerLink="/dashboard/rmit-bot"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="dot"></span>
+        <span>RMIT Bot</span>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <div class="nav-group">GENERAL</div>
+      <a class="nav-item muted" href="#">
+        <span class="dot small"></span>
+        <span>Settings</span>
+      </a>
+      <a class="nav-item muted" href="#">
+        <span class="dot small"></span>
+        <span>Help</span>
+      </a>
+      <a class="nav-item muted" href="#">
+        <span class="dot small"></span>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main column -->
+  <div class="main">
+    <!-- Top bar -->
+
+<router-outlet></router-outlet>
+    <!-- Content grid -->
+
+  </div>
+</div>
