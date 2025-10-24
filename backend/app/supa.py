@@ -1,70 +1,115 @@
-# app/supa_rest.py
-import os
-from typing import Any, Dict, Optional
 import requests
-from fastapi import HTTPException, Header
+from supabase import create_client, Client
+import psycopg2
+from dotenv import load_dotenv
+import os
+from fastapi import FastAPI, HTTPException
 
-SUPABASE_URL  = os.getenv("SUPABASE_URL")           # e.g. https://xyzcompany.supabase.co
-SUPABASE_ANON = os.getenv("SUPABASE_ANON_KEY")      # Project settings → API → anon public
-SUPABASE_SR   = os.getenv("SUPABASE_SERVICE_ROLE_KEY")  # service_role (keep secret)
+# # Load environment variables from .env
+# load_dotenv("database_key.env")
 
-if not (SUPABASE_URL and SUPABASE_ANON and SUPABASE_SR):
-    raise RuntimeError("Missing SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY in env")
 
-def _rest(
-    method: str,
-    path: str,
-    *,
-    json: Optional[Dict[str, Any]] = None,
-    params: Optional[Dict[str, Any]] = None,
-    admin: bool = True,
-):
-    """
-    Minimal REST caller for Supabase PostgREST and GoTrue.
-    admin=True -> uses service role (bypasses RLS for server-side ops).
-    """
-    headers = {
-        "apikey": SUPABASE_SR if admin else SUPABASE_ANON,
-        "Authorization": f"Bearer {SUPABASE_SR if admin else SUPABASE_ANON}",
-        "Content-Type": "application/json",
-    }
-    url = f"{SUPABASE_URL}{path}"
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+# Initialize FastAPI app
+app = FastAPI(title="RMIT ONE - WEB")
+
+
+@app.post("/signup")
+async def signup_user(user: UserSignup):
     try:
-        r = requests.request(method, url, headers=headers, json=json, params=params, timeout=20)
-    except requests.RequestException as e:
-        raise HTTPException(502, f"Supabase error: {e}")
-    if r.status_code >= 400:
-        raise HTTPException(r.status_code, r.text)
-    return r.json() if r.text else None
+        # Check if user already exists
+        existing_user = supabase.table("User").select("user_id").eq("email", user.email).execute()
 
-# ---------- Table helpers (PostgREST) ----------
-def upsert(table: str, payload: Dict[str, Any], *, on_conflict: str) -> Dict[str, Any]:
-    return _rest(
-        "POST",
-        f"/rest/v1/{table}",
-        json=payload,
-        params={"on_conflict": on_conflict, "return": "representation"},
-        admin=True,
-    )[0]
+        if existing_user.data:
+            raise HTTPException(status_code=400, detail="User with this email already exists")
 
-def select_one(table: str, filters: Dict[str, Any], columns: str = "*") -> Optional[Dict[str, Any]]:
-    params = {**{f"{k}.eq": v for k, v in filters.items()}, "select": columns}
-    rows = _rest("GET", f"/rest/v1/{table}", params=params, admin=True)
-    return rows[0] if rows else None
+        # Insert new user
+        new_user = {
+            "user_id": user.user_id,
+            "name": user.name,
+            "email": user.email,
+            "api_token": user.api_token,
+            "password" : user.password
+        }
 
-# ---------- Auth helper (GoTrue) ----------
-def validate_supabase_user(authorization: str = Header(default=None)) -> str:
-    """
-    Validate the user's JWT from the client and return user id.
-    Client should send:  Authorization: Bearer <supabase-user-jwt>
-    """
-    if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(401, "Missing Authorization bearer token")
-    jwt = authorization.split(" ", 1)[1].strip()
-    # GoTrue user endpoint – needs anon key + the user's JWT
-    headers = {"apikey": SUPABASE_ANON, "Authorization": f"Bearer {jwt}"}
-    url = f"{SUPABASE_URL}/auth/v1/user"
-    r = requests.get(url, headers=headers, timeout=15)
-    if r.status_code != 200:
-        raise HTTPException(401, "Invalid Supabase token")
-    return r.json()["id"]
+        result = supabase.table("User").insert(new_user).execute()
+
+        return {"message": "User created successfully", "data": result.data}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def get_user_details():
+    try:
+        result = supabase.table("User").select("api_token").eq("user_id", USER_ID).execute()
+        
+        if not result.data:
+            raise Exception(f"No user found with id {USER_ID}")
+        print(result)
+        api_token = result.data[0]["api_token"]
+        print("Token retrieved from Supabase:", api_token)
+        return api_token
+
+    except Exception as e:
+        print("Error fetching token:", e)
+        exit(1)
+
+def get_courses():
+    api_token = get_user_details()
+
+    # Step 2: Use the token to call an API (example Canvas API endpoint)
+    API_URL_COURSES = "https://rmit.instructure.com/api/v1/courses"  # Example
+    result_email = ((supabase.table("User").select("email").eq("user_id", USER_ID).execute()).data)[0]
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Accept": "application/json"
+    }
+
+    try:
+        response = requests.get(API_URL_COURSES, headers=headers)
+        response.raise_for_status()
+        courses = response.json()
+        print("API data fetched successfully!")
+
+        # Extract only the required fields
+        filtered_courses = [
+            {
+                "course_id": c.get("id"),
+                "course_name": c.get("name"),
+                "course_code": c.get("course_code"),
+                "created_at": c.get("created_at"),
+                "start_at": c.get("start_at"),
+                "end_at": c.get("end_at"),
+                "user_id" : USER_ID,
+                "email" : result_email,
+                "apply_assignment_group_weights": c.get("apply_assignment_group_weights")
+            }
+            for c in courses
+        ]
+
+        print(filtered_courses)
+
+        insert_result = supabase.table("Courses").insert(filtered_courses).execute()
+
+        if insert_result.data:
+            print(f"Successfully inserted {len(insert_result.data)} course records into Supabase!")
+        else:
+            print("Insert executed but no data returned (check table or constraints).")
+
+    except requests.exceptions.RequestException as e:
+        print("Error calling API:", e)
+
+    except Exception as e:
+        print("Error inserting data into Supabase:", e)
+
+# Connect to the database
+try:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    print
+except Exception as e:
+    print(e)
+
+# Hardcoded user_id (replace with actual user ID)
+USER_ID = 4190959
