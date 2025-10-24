@@ -1,0 +1,29 @@
+# Node/Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/out-tsc/
+frontend/coverage/
+frontend/.env
+frontend/*.env
+frontend/src/environments/environment.*.ts
+
+# Python/FastAPI
+backend/.venv/
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/.mypy_cache/
+backend/.pytest_cache/
+backend/.env
+backend/*.env
+backend/*.db  # your SQLite files
+
+# General
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.log
