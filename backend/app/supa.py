@@ -16,37 +16,47 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 # Initialize FastAPI app
 app = FastAPI(title="RMIT ONE - WEB")
 
-
-# Pydantic model for user signup request
-class UserSignup(BaseModel):
-    user_id: int
-    name: str
-    email: EmailStr
-    api_token: str | None = None 
-    password : str
-
-
 @app.post("/signup")
-async def signup_user(user: UserSignup):
+async def signup_user(user_id: int, name: str, email: str, api_token: str ,password : str):
     try:
         # Check if user already exists
-        existing_user = supabase.table("User").select("user_id").eq("email", user.email).execute()
+        existing_user = supabase.table("User").select("user_id").eq("email", email).execute()
 
         if existing_user.data:
             raise HTTPException(status_code=400, detail="User with this email already exists")
 
         # Insert new user
         new_user = {
-            "user_id": user.user_id,
-            "name": user.name,
-            "email": user.email,
-            "api_token": user.api_token,
-            "password" : user.password
+            "user_id": user_id,
+            "name": name,
+            "email": email,
+            "api_token": api_token,
+            "password" : password
         }
 
         result = supabase.table("User").insert(new_user).execute()
 
         return {"message": "User created successfully", "data": result.data}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/login")
+async def signup_user(email: str, api_token: str ,password : str):
+    try:
+        # Check if user already exists
+        existing_user = supabase.table("User").select("user_id").eq("email", email).execute()
+
+        if not existing_user.data:
+            raise HTTPException(status_code=400, detail="User does not exist!! Please register!!")
+        
+        # Check if user already exists
+        existing_user = supabase.table("User").select("*").eq("email", email).eq("password", password).execute()
+
+        if not existing_user.data:
+            raise HTTPException(status_code=400, detail="Email or password is wrong!! Please try logging in again!!!")
+        
+        print(existing_user.data)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
