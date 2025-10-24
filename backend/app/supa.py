@@ -4,6 +4,7 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, EmailStr
 
 # # Load environment variables from .env
 # load_dotenv("database_key.env")
@@ -14,6 +15,15 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # Initialize FastAPI app
 app = FastAPI(title="RMIT ONE - WEB")
+
+
+# Pydantic model for user signup request
+class UserSignup(BaseModel):
+    user_id: int
+    name: str
+    email: EmailStr
+    api_token: str | None = None 
+    password : str
 
 
 @app.post("/signup")
