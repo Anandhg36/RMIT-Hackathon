@@ -27,18 +27,19 @@ USER_ID = 4190959
 app = FastAPI(title="RMIT ONE - WEB")
 
 @app.post("/signup")
-async def signup_user(user_id: int, name: str, email: str, api_token: str ,password : str):
+async def signup_user(name: str, email: str, api_token: str ,password : str):
     try:
         # Check if user already exists
         existing_user = supabase.table("User").select("user_id").eq("email", email).execute()
 
         if existing_user.data:
             raise HTTPException(status_code=400, detail="User with this email already exists")
-
+        
+        user_id = email.split('@')[0]
         # Insert new user
         new_user = {
             "user_id": user_id,
-            "name": name,
+            "full_name": name,
             "email": email,
             "api_token": api_token,
             "password" : password
@@ -52,7 +53,7 @@ async def signup_user(user_id: int, name: str, email: str, api_token: str ,passw
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/login")
-async def signup_user(email: str, api_token: str ,password : str):
+async def signup_user(email: str ,password : str):
     try:
         # Check if user already exists
         existing_user = supabase.table("User").select("user_id").eq("email", email).execute()
