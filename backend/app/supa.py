@@ -13,6 +13,16 @@ from pydantic import BaseModel, EmailStr
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
+# Connect to the database
+try:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    print
+except Exception as e:
+    print(e)
+
+# Hardcoded user_id (replace with actual user ID)
+USER_ID = 4190959
+
 # Initialize FastAPI app
 app = FastAPI(title="RMIT ONE - WEB")
 
@@ -124,12 +134,34 @@ def get_courses():
     except Exception as e:
         print("Error inserting data into Supabase:", e)
 
-# Connect to the database
-try:
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    print
-except Exception as e:
-    print(e)
 
-# Hardcoded user_id (replace with actual user ID)
-USER_ID = 4190959
+@app.get("/users/{user_id}/courses/find_classmate")
+def get_user_courses(user_id: int):
+    """
+    Fetch all courses for a given user_id and return only selected fields.
+    """
+    try:
+        # Query Supabase
+        response = supabase.table("Courses").select("*").eq("user_id", user_id).execute()
+
+        if not response.data:
+            raise HTTPException(status_code=404, detail=f"No courses found for user_id {user_id}")
+
+        # Filter and rename fields for response
+        filtered_courses = [
+            {
+                "id": course.get("course_id"),
+                "name": course.get("course_name"),
+                "course_code": course.get("course_code"),
+                "created_at": course.get("created_at"),
+                "start_at": course.get("start_at"),
+                "end_at": course.get("end_at"),
+                "apply_assignment_group_weights": course.get("apply_assignment_group_weights")
+            }
+            for course in response.data
+        ]
+
+        return filtered_courses
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
