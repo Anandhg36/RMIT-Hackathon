@@ -3,6 +3,7 @@ from supabase import create_client, Client
 import psycopg2
 from dotenv import load_dotenv
 import os
+from typing import List
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
 
@@ -16,7 +17,6 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 # Connect to the database
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    print
 except Exception as e:
     print(e)
 
@@ -136,7 +136,7 @@ def get_courses():
         print("Error inserting data into Supabase:", e)
 
 
-@app.get("/users/{user_id}/courses/find_classmate")
+@app.get("/users/{user_id}/courses")
 def get_user_courses(user_id: int):
     """
     Fetch all courses for a given user_id and return only selected fields.
@@ -164,5 +164,72 @@ def get_user_courses(user_id: int):
 
         return filtered_courses
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+class ClassmateRequest(BaseModel):
+    is_theory: bool
+    course_id: int
+    day_of_course: str
+    time_of_day: str
+    room_of_course: str
+    user_id: int
+
+@app.post("/find_classmate")
+async def find_classmate(requests: List[ClassmateRequest]):
+    try:
+        all_results = []
+
+        for req in requests:
+            existing_course = (
+                supabase.table("Course_timetable")
+                .select("course_id", "user_id", "day_of_course", "time_of_day", "room_of_course", "course_name", "is_theory")
+                .eq("course_id", req.course_id)
+                .eq("day_of_course", req.day_of_course)
+                .eq("time_of_day", req.time_of_day)
+                .eq("room_of_course", req.room_of_course)
+                .execute()
+            )
+
+            if not existing_course.data:
+                raise HTTPException(status_code=400, detail="Course Does not exist please check the course_id or user_id")
+            
+            user_id = req.user_id
+            new_course_timetable = {
+                "user_id": req.user_id,
+                "course_id": req.course_id,
+                "day_of_course": req.day_of_course,
+                "time_of_day": req.time_of_day,
+                "room_of_course": req.room_of_course,
+                "course_name": existing_course.data[0]["course_name"],
+                "is_theory": req.is_theory
+            }
+        
+            try:
+                result = supabase.table("Course_timetable").insert(new_course_timetable).execute()
+                print("Inserted data to table Course timetable", result.data)
+            except Exception as e:
+                print("Error inserting data to the table: ",e)
+        
+        
+        ### GET SAME PEOPLE FROM COURSE ###
+        # First get the courses for this user id #
+
+        result_get_user_course = supabase.table("Course_timetable").select("course_id","day_of_course","time_of_day","room_of_course","course_name","is_theory")\
+        .eq("user_id", user_id).execute()
+
+        if not result_get_user_course.data:
+            raise HTTPException(status_code=400, detail="User doesnt exist in course timetable table!! Please insert")
+        
+        
+
+        result_same_time = supabase.table("Course_timetable").select("course_id","user_id","day_of_course","time_of_day","room_of_course","course_name","is_theory")\
+        .eq("course_id", course_id).eq("day_of_course", day_of_course).eq("time_of_day", time_of_day).eq("room_of_course", room_of_course).execute()
+
+        if not result_same_time.data:
+            # Filter and rename fields for response
+            return {"message": "No matching users found", "status_code":404}
+    
+        return {"message" : "Users found" , "data" : result_same_time.data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
