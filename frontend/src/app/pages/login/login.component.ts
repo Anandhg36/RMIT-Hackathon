@@ -3,9 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/authservice'; // make sure this path matches your project
 
-// If you use Angular's proxy, set API_BASE = '/api'
+// TODO: move this to environment.ts later
 const API_BASE = 'http://localhost:8010';
+
+// Shape of what the backend returns from /login
+interface LoginResponse {
+  user_id: number;
+  message?: string;
+}
 
 @Component({
   selector: 'app-login',
@@ -18,6 +25,7 @@ export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   loading = false;
   error: string | null = null;
@@ -29,6 +37,7 @@ export class LoginComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Autofill saved email if "remember me" was used
     const saved = localStorage.getItem('auth_email');
     if (saved) {
       this.form.patchValue({ email: saved, remember: true });
@@ -47,35 +56,54 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    const email = this.f.email.value!.trim();
-    const password = this.f.password.value!;
+    // pull values safely
+    const email = (this.f.email.value ?? '').trim();
+    const password = this.f.password.value ?? '';
     const remember = !!this.form.value.remember;
 
-    // Backend expects POST with query params (no JSON body)
-    const params = new HttpParams().set('email', email).set('password', password);
+    // build query params because your backend expects them that way
+    const params = new HttpParams()
+      .set('email', email)
+      .set('password', password);
 
     this.loading = true;
 
-    this.http.post(`${API_BASE}/login`, null, { params }).subscribe({
-      next: () => {
-        this.loading = false;
+    this.http
+      .post<LoginResponse>(`${API_BASE}/login`, null, { params })
+      .subscribe({
+        next: (resp) => {
+          this.loading = false;
 
-        if (remember) {
-          localStorage.setItem('auth_email', email);
-        } else {
-          localStorage.removeItem('auth_email');
-        }
+          // store remembered email for next visit (UI autofill convenience)
+          if (remember) {
+            localStorage.setItem('auth_email', email);
+          } else {
+            localStorage.removeItem('auth_email');
+          }
 
-        this.router.navigateByUrl('/dashboard');
-      },
-      error: (err: HttpErrorResponse) => {
-        this.loading = false;
-        const detail =
-          (err.error && (err.error.detail || err.error.message)) ||
-          err.message ||
-          'Login failed';
-        this.error = typeof detail === 'string' ? detail : 'Login failed';
-      },
-    });
+          // defensive check: make sure backend actually sent user_id
+          if (resp && typeof resp.user_id === 'number') {
+            this.auth.setUserId(resp.user_id); // <--- global user ID
+          } else {
+            // backend didn't return what we expected
+            this.error = 'Login succeeded but user_id was not returned.';
+            return;
+          }
+          
+          this.router.navigateByUrl('/dashboard');
+        },
+
+        error: (err: HttpErrorResponse) => {
+          this.loading = false;
+
+          const detail =
+            (err.error && (err.error.detail || err.error.message)) ||
+            err.message ||
+            'Login failed';
+
+          this.error =
+            typeof detail === 'string' ? detail : 'Login failed';
+        },
+      });
   }
 }

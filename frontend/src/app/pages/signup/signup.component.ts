@@ -1,11 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
 
-/** TODO: move to environments */
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'http://localhost:8010';
 
 interface SignupResponse {
   message: string;
@@ -41,11 +40,9 @@ export class SignupComponent {
   /** Generate an API token for the user (client-side) */
   private generateToken(): string {
     try {
-      // modern browsers
-      // @ts-ignore - TS lib may not include randomUUID in some configs
+      // @ts-ignore - crypto.randomUUID may not exist on older TS lib targets
       if (crypto?.randomUUID) return crypto.randomUUID();
     } catch {}
-    // fallback
     return (
       Math.random().toString(36).slice(2) +
       '-' +
@@ -59,37 +56,36 @@ export class SignupComponent {
     this.error = null;
     this.success = false;
 
+    // mark all fields touched so validation shows
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const payload = {
-      name: this.f.name.value!.trim(),
-      email: this.f.email.value!.trim(),
-      api_token: this.generateToken(),
-      password: this.f.password.value!,
-    };
-
+  const payload = new HttpParams()
+    .set('name', this.f.name.value!.trim())
+    .set('email', this.f.email.value!.trim())
+    .set('api_token', this.generateToken())
+    .set('password', this.f.password.value!);
     this.loading = true;
 
-    this.http
-      .post<SignupResponse>(`${API_BASE}/signup`, payload)
-      .subscribe({
-        next: () => {
-          this.loading = false;
-          this.success = true;
-          // navigate after success — change to '/dashboard' if you prefer
-          setTimeout(() => this.router.navigateByUrl('/login'), 300);
-        },
-        error: (err: HttpErrorResponse) => {
-          this.loading = false;
-          const detail =
-            (err.error && (err.error.detail || err.error.message)) ||
-            err.message ||
-            'Signup failed';
-          this.error = typeof detail === 'string' ? detail : 'Signup failed';
-        },
-      });
+    this.http.post<SignupResponse>(`${API_BASE}/signup`, payload).subscribe({
+      next: () => {
+        this.loading = false;
+        this.success = true;
+
+        // redirect to login after a tiny pause
+        setTimeout(() => this.router.navigateByUrl('/login'), 300);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loading = false;
+        const detail =
+          (err.error && (err.error.detail || err.error.message)) ||
+          err.message ||
+          'Signup failed';
+        this.error =
+          typeof detail === 'string' ? detail : 'Signup failed';
+      },
+    });
   }
 }

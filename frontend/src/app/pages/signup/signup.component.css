@@ -99,3 +99,25 @@
   .card{ grid-template-columns:1fr }
   .hero{ border-right:0; border-bottom:1px solid var(--line); padding-bottom:24px }
 }
+
+.form input.invalid {
+  border: 1px solid #d12c2c;
+  outline: none;
+}
+
+.error {
+  color: #d12c2c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.success {
+  color: #267b3d;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.cta[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -28,6 +28,12 @@ export const routes: Routes = [
           import('./pages/dashboard/rmit-chat/rmit-chat.component')
             .then(m => m.RmitChatComponent),
       },
+      {
+        path: 'chat-view',
+        loadComponent: () =>
+          import('./pages/dashboard/chat-view/chat-view.component')
+            .then(m => m.ChatViewComponent),
+      },
     ],
   },
 

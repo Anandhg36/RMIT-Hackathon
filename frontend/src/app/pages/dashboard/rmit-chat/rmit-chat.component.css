@@ -1,0 +1,209 @@
+/* page wrapper */
+.rmit-chat {
+  min-height: 100vh;
+  background-color: #f6f3ff; /* soft lilac background */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 2rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: #1a133a;
+  box-sizing: border-box;
+}
+
+/* main column */
+.center-stack {
+  width: 100%;
+  max-width: 980px;
+  text-align: center;
+  padding: 0 1rem 2rem;
+  box-sizing: border-box;
+}
+
+/* heading */
+.center-stack h1 {
+  font-size: clamp(1.8rem, 1vw + 1.4rem, 2.4rem);
+  line-height: 1.2;
+  font-weight: 700;
+  color: #1a133a;
+  margin-bottom: 1.25rem;
+}
+
+/* search bar wrapper */
+.search {
+  margin: 0 auto;
+  max-width: 980px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 999px;
+  box-shadow:
+    0 30px 60px -10px rgba(65, 34, 141, 0.15),
+    0 8px 24px rgba(65, 34, 141, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  padding: 0.75rem 1rem;
+  gap: 0.75rem;
+  box-sizing: border-box;
+}
+
+.search .left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 1rem;
+}
+
+/* input styling */
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #2a214c;
+  min-width: 0;
+}
+
+.search-input::placeholder {
+  color: #6c5a99;
+}
+
+/* right side icons */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  min-width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(65, 34, 141, 0.08);
+  color: #2a214c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.icon-btn[disabled],
+.mic[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* purple gradient round mic button */
+.mic {
+  background: radial-gradient(circle at 30% 30%, #f2cfff 0%, #a173c7 70%);
+  border: none;
+  border-radius: 999px;
+  min-width: 2.2rem;
+  height: 2.2rem;
+  cursor: pointer;
+  box-shadow:
+    0 20px 40px rgba(161, 115, 199, 0.4),
+    0 6px 20px rgba(161, 115, 199, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.mic svg {
+  display: block;
+  fill: currentColor;
+}
+
+/* wrapper around scrolling area */
+.thread-wrapper {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* scrollable chat area */
+.thread-scroll {
+  width: 100%;
+  max-width: 980px;
+
+  /* UPDATED HEIGHT */
+  max-height: 70vh;
+  overflow-y: auto;
+
+  /* spacing & layout for messages */
+  display: flex;
+  flex-direction: column;
+  row-gap: 1.5rem;
+
+  padding-right: 0.5rem; /* keep text from touching scrollbar */
+  box-sizing: border-box;
+}
+
+/* optional: prettier scrollbar for webkit browsers */
+.thread-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.thread-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 999px;
+}
+
+.thread-scroll::-webkit-scrollbar-thumb {
+  background: rgba(88, 55, 139, 0.4); /* purple-ish thumb */
+  border-radius: 999px;
+}
+
+.thread-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(88, 55, 139, 0.6);
+}
+
+/* each message row controls alignment */
+.row {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.row.from-user {
+  justify-content: flex-end;
+}
+
+.row.from-bot {
+  justify-content: flex-start;
+}
+
+/* user bubble (right side pill) */
+.bubble.user {
+  background: #f5f5f5;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  line-height: 1.3;
+  color: #1a1a1a;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  max-width: 80%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* bot bubble (left side text block) */
+.bubble.bot {
+  background: transparent;
+  color: #1a133a;
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 80%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

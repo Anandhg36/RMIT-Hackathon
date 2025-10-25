@@ -1,1 +1,68 @@
-<p>rmit-chat works!</p>
+<div class="rmit-chat">
+  <div class="center-stack">
+    <h1>What can I help you with at RMIT?</h1>
+
+    <div class="search">
+      <div class="left">
+        <!-- reserved for future icons -->
+      </div>
+
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Ask anything"
+        aria-label="Ask anything"
+        [(ngModel)]="inputText"
+        (keyup.enter)="onEnter()"
+        [disabled]="sending"
+      />
+
+      <div class="right">
+        <button class="icon-btn" title="Tools" [disabled]="sending">
+          <span class="dot-icon">✚</span>
+        </button>
+
+        <button class="mic" title="Start voice" [disabled]="sending">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <rect x="9" y="4" width="6" height="10" rx="3"></rect>
+            <path
+              d="M5 12h2a5 5 0 0 0 10 0h2a7 7 0 0 1-14 0Z"
+              fill="currentColor"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat thread container -->
+    <div class="thread-wrapper">
+      <div class="thread-scroll">
+        <div
+          class="row"
+          *ngFor="let m of messages"
+          [ngClass]="{
+            'from-user': m.role === 'user',
+            'from-bot': m.role === 'bot'
+          }"
+        >
+          <!-- user bubble on the right -->
+          <div
+            class="bubble user"
+            *ngIf="m.role === 'user'"
+          >
+            {{ m.text }}
+          </div>
+
+          <!-- bot bubble on the left -->
+          <div
+            class="bubble bot"
+            *ngIf="m.role === 'bot'"
+          >
+            {{ m.text }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
