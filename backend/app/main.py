@@ -41,7 +41,7 @@ app.add_middleware(
 async def home():
     return {"message": "Welcome to RMIT ONE - WEB"}
 @app.post("/signup")
-async def signup_user(name: str, email: str, canvas_token: str ,password : str):
+async def signup_user(name: str, email: str, api_token: str ,password : str):
     try:
         # Check if user already exists
         existing_user = supabase.table("User").select("user_id").eq("email", email).execute()
