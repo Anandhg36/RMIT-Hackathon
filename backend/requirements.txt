@@ -1,7 +1,8 @@
 fastapi
 uvicorn[standard]
-requests
 python-dotenv
-cryptography
-supabase==2.3.5
-python-jose
+httpx
+supabase>=2.5,<3
+realtime>=2.0.2
+websockets>=12,<16
+requests
