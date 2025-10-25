@@ -222,6 +222,18 @@ class ClassmateRequest(BaseModel):
     room_of_course: str
     user_id: int
 
+@app.post("/query")
+def n8n_vetri(Query : str):
+
+    url = "https://manasvinii.app.n8n.cloud/webhook-test/assignments-question"
+    payload = {
+        "question": Query
+    }
+
+    response = requests.post(url, json=payload)
+    print(response.status_code)
+    print(response.json())  # The JSON response from n8n
+
 @app.post("/find_classmate")
 async def find_classmate(requests: List[ClassmateRequest]):
     try:
