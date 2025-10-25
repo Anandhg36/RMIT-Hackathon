@@ -16,19 +16,53 @@
     <main class="form-pane">
       <section class="form-area">
         <h1>Sign Up</h1>
-        <form class="form">
-          <input type="text" placeholder="Email or Phone" />
-          <input type="text" placeholder="Full Name" />
-          <input type="password" placeholder="Password" />
-          <button type="submit" class="cta">Let’s Get Started!</button>
 
-          <!-- <div class="divider"><span>Or continue with</span></div>
-          <div class="social">
-            <button type="button" class="btn social-fb"><span>f</span> Facebook</button>
-            <button type="button" class="btn social-gg"><span>G</span> Google</button>
-          </div> -->
+        <!-- NOTE: bind the reactive form + hook submit -->
+        <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <!-- Email OR Phone -->
+          <input
+            type="text"
+            placeholder="Email or Phone"
+            formControlName="email"
+            [class.invalid]="f.email.touched && f.email.invalid"
+          />
 
-          <p class="alt">Already a member? <a href="#">Sign In</a></p>
+          <!-- Full Name -->
+          <input
+            type="text"
+            placeholder="Full Name"
+            formControlName="name"
+            [class.invalid]="f.name.touched && f.name.invalid"
+          />
+
+          <!-- Password -->
+          <input
+            type="password"
+            placeholder="Password"
+            formControlName="password"
+            [class.invalid]="f.password.touched && f.password.invalid"
+          />
+
+          <!-- Error text (API or validation after submit) -->
+          <p class="error" *ngIf="error">{{ error }}</p>
+
+          <!-- Success text -->
+          <p class="success" *ngIf="success">Account created! Redirecting…</p>
+
+          <!-- Submit CTA -->
+          <button
+            type="submit"
+            class="cta"
+            [disabled]="loading"
+          >
+            <span *ngIf="!loading">Let’s Get Started!</span>
+            <span *ngIf="loading">Creating account…</span>
+          </button>
+
+          <p class="alt">
+            Already a member?
+            <a routerLink="/login">Sign In</a>
+          </p>
         </form>
       </section>
     </main>
