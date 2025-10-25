@@ -109,3 +109,13 @@
   .form-container{ padding: 18px }
   .course-partition{ flex-direction: column; }
 }
+
+/* loader block */
+.loading{
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  padding: 36px 0;
+  color: var(--ink-soft);
+}
+.loading .hint{ margin: 0; font-size: 14px; }
