@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from 'src/app/authservice';
 
 const API_BASE = 'http://localhost:8010';
 
@@ -25,7 +26,13 @@ interface ChatMessage {
 })
 export class RmitChatComponent {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
 
+
+  private get userId(): number {
+    const userid = this.auth.getUserId();
+    return userid ?? 4190959;
+  }
   // bound to the input box
   inputText = '';
 
@@ -34,39 +41,39 @@ export class RmitChatComponent {
 
   // chat history rendered in UI (dummy starter values so you can SEE layout)
   messages: ChatMessage[] = [
-    {
-      role: 'bot',
-      text:
-        "Sweet, let's do a clean nuke-and-reinstall cycle so your backend/uvicorn/etc runs fresh.",
-    },
-    {
-      role: 'user',
-      text: 'remove and install',
-    },
-    {
-      role: 'user',
-      text: 'Give my all courses',
-    },
-    {
-      role: 'bot',
-      text:
-        'Here are the courses I found for you:\n\n' +
-        '• COSC1234 - Software Engineering 1\n' +
-        '  - Theory: Mon 10:30 - 12:30, 08.03.12\n' +
-        '  - Practical: Wed 14:00 - 16:00, 10.04.22\n\n' +
-        '• ISYS5678 - Data Management\n' +
-        '  - Theory: Tue 09:00 - 11:00, 05.02.10\n' +
-        '  - Practical: Thu 13:00 - 15:00, 06.01.07',
-    },
-    {
-      role: 'bot',
-      text:
-        'Do you want me to connect you with classmates in the same practical lab group?',
-    },
-    {
-      role: 'user',
-      text: 'yes, practical group for Data Management',
-    },
+    // {
+    //   role: 'bot',
+    //   text:
+    //     "Sweet, let's do a clean nuke-and-reinstall cycle so your backend/uvicorn/etc runs fresh.",
+    // },
+    // {
+    //   role: 'user',
+    //   text: 'remove and install',
+    // },
+    // {
+    //   role: 'user',
+    //   text: 'Give my all courses',
+    // },
+    // {
+    //   role: 'bot',
+    //   text:
+    //     'Here are the courses I found for you:\n\n' +
+    //     '• COSC1234 - Software Engineering 1\n' +
+    //     '  - Theory: Mon 10:30 - 12:30, 08.03.12\n' +
+    //     '  - Practical: Wed 14:00 - 16:00, 10.04.22\n\n' +
+    //     '• ISYS5678 - Data Management\n' +
+    //     '  - Theory: Tue 09:00 - 11:00, 05.02.10\n' +
+    //     '  - Practical: Thu 13:00 - 15:00, 06.01.07',
+    // },
+    // {
+    //   role: 'bot',
+    //   text:
+    //     'Do you want me to connect you with classmates in the same practical lab group?',
+    // },
+    // {
+    //   role: 'user',
+    //   text: 'yes, practical group for Data Management',
+    // },
   ];
 
   /**
@@ -100,16 +107,18 @@ export class RmitChatComponent {
 
     // 5. POST to backend
     // Body shape: { query: "<user typed text>" }
-    const body = { query: text };
+    const body = { query: text, user_id: this.userId };
 
-    this.http.post<QueryResponse>(`${API_BASE}/query`, body).subscribe({
+    this.http.post<any>(`${API_BASE}/query`, body).subscribe({
       next: (res) => {
         this.sending = false;
 
-        // replace placeholder with backend's actual reply
+        const replyText =
+          res?.message?.content ?? '(no response)';
+
         this.messages[pendingIndex] = {
           role: 'bot',
-          text: res?.reply ?? '(no response)',
+          text: replyText,
         };
       },
       error: (err: HttpErrorResponse) => {
@@ -120,12 +129,12 @@ export class RmitChatComponent {
           err.message ||
           'Something went wrong';
 
-        // replace placeholder with error text
         this.messages[pendingIndex] = {
           role: 'bot',
           text: `Error: ${detail}`,
         };
       },
     });
+
   }
 }

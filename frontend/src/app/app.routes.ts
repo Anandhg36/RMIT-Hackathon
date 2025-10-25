@@ -15,7 +15,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'find-classmate' },
+      { path: '', pathMatch: 'full', redirectTo: 'chat-view' },
       {
         path: 'find-classmate',
         loadComponent: () =>

@@ -19,24 +19,21 @@
 </div>
 
 <!-- MAIN VIEW -->
-<div
-  class="courses-shell"
-  *ngIf="!loading && !error && courses?.length; else emptyState"
->
+<div class="courses-shell" *ngIf="!loading && !error && courses?.length; else emptyState">
   <!-- Title -->
   <h2 class="page-title">Your Courses</h2>
 
   <!-- COURSE PICKER BAR -->
 <div class="course-bar-wrapper">
   <div class="course-bar">
-    <!-- sliding highlight -->
+    <!-- ACTIVE PILL -->
     <div
       class="course-bar__active-pill"
       [style.width.px]="TAB_WIDTH"
       [style.transform]="'translateX(' + ((selectedIndex ?? 0) * TAB_WIDTH) + 'px)'"
     ></div>
 
-    <!-- each tab -->
+    <!-- TABS -->
     <button
       class="course-tab"
       *ngFor="let course of courses; let i = index"
@@ -54,112 +51,113 @@
 
 
   <!-- INFO CARD for selected course -->
-  <section class="details-card" *ngIf="selectedIndex !== null">
-    <!-- Toggle Theory / Practical -->
-    <div class="mode-toggle">
-      <button
-        class="mode-btn"
-        [class.active]="selectedSubTab === 'theory'"
-        (click)="switchSubTab('theory')"
-      >
-        Theory
-      </button>
-      <button
-        class="mode-btn"
-        [class.active]="selectedSubTab === 'practical'"
-        (click)="switchSubTab('practical')"
-      >
-        Practical
-      </button>
-    </div>
+  <section class="details-card" *ngIf="currentCourse as cur">
+  <!-- Toggle Theory / Practical -->
+  <div class="mode-toggle">
+    <button
+      class="mode-btn"
+      [class.active]="selectedSubTab === 'theory'"
+      (click)="switchSubTab('theory')"
+    >
+      Theory
+    </button>
+    <button
+      class="mode-btn"
+      [class.active]="selectedSubTab === 'practical'"
+      (click)="switchSubTab('practical')"
+    >
+      Practical
+    </button>
+  </div>
 
-    <!-- Slide container -->
-    <div class="details-slider">
-      <div
-        class="details-track"
-        [style.transform]="
-          selectedSubTab === 'theory'
-            ? 'translateX(0)'
-            : 'translateX(-100%)'
-        "
-      >
-        <!-- THEORY PANE -->
-        <div class="details-pane">
-          <h3 class="pane-title">Theory Details</h3>
+  <!-- DETAILS JUST FOR CURRENT TAB -->
+  <div class="single-session-content">
+    <!-- THEORY VIEW -->
+    <ng-container *ngIf="selectedSubTab === 'theory'; else practicalBlock">
+      <h3 class="pane-title">Theory Details</h3>
 
-          <div class="info-row">
-            <span class="label">Day:</span>
-            <span class="value">{{
-              courses[selectedIndex].theory.day || '—'
-            }}</span>
-          </div>
-
-          <div class="info-row">
-            <span class="label">Time:</span>
-            <span class="value">{{
-              courses[selectedIndex].theory.time || '—'
-            }}</span>
-          </div>
-
-          <div class="info-row">
-            <span class="label">Classroom:</span>
-            <span class="value">{{
-              courses[selectedIndex].theory.classroom || '—'
-            }}</span>
-          </div>
-        </div>
-
-        <!-- PRACTICAL PANE -->
-        <div class="details-pane">
-          <h3 class="pane-title">Practical Details</h3>
-
-          <div class="info-row">
-            <span class="label">Day:</span>
-            <span class="value">{{
-              courses[selectedIndex].practical.day || '—'
-            }}</span>
-          </div>
-
-          <div class="info-row">
-            <span class="label">Time:</span>
-            <span class="value">{{
-              courses[selectedIndex].practical.time || '—'
-            }}</span>
-          </div>
-
-          <div class="info-row">
-            <span class="label">Classroom:</span>
-            <span class="value">{{
-              courses[selectedIndex].practical.classroom || '—'
-            }}</span>
-          </div>
-        </div>
+      <div class="info-row">
+        <span class="label">Day:</span>
+        <span class="value">{{ cur.theory?.day || '—' }}</span>
       </div>
-    </div>
-  </section>
+
+      <div class="info-row">
+        <span class="label">Time:</span>
+        <span class="value">{{ cur.theory?.time || '—' }}</span>
+      </div>
+
+      <div class="info-row">
+        <span class="label">Classroom:</span>
+        <span class="value">{{ cur.theory?.classroom || '—' }}</span>
+      </div>
+    </ng-container>
+
+    <!-- PRACTICAL VIEW -->
+    <ng-template #practicalBlock>
+      <h3 class="pane-title">Practical Details</h3>
+
+      <div class="info-row">
+        <span class="label">Day:</span>
+        <span class="value">{{ cur.practical?.day || '—' }}</span>
+      </div>
+
+      <div class="info-row">
+        <span class="label">Time:</span>
+        <span class="value">{{ cur.practical?.time || '—' }}</span>
+      </div>
+
+      <div class="info-row">
+        <span class="label">Classroom:</span>
+        <span class="value">{{ cur.practical?.classroom || '—' }}</span>
+      </div>
+    </ng-template>
+  </div>
+</section>
+
 
   <!-- STUDENT LIST -->
-  <section class="students-card" *ngIf="selectedIndex !== null">
+  <section class="students-card" *ngIf="currentCourse as cur">
     <div class="students-head">
       <h3 class="students-title">Students Enrolled in this Class</h3>
     </div>
 
     <div class="students-scroll">
-      <div class="student-row" *ngFor="let student of dummyStudents">
+      <!-- classmates for the active tab -->
+      <div class="student-row" *ngFor="
+          let student of (
+            selectedSubTab === 'theory'
+              ? cur.theory?.students
+              : cur.practical?.students
+          ) || []
+        ">
         <div class="student-meta">
           <div class="avatar-circle">
             <span class="avatar-initial">
-              {{ student.name ? student.name.charAt(0) : '?' }}
+              {{ student?.name ? student.name.charAt(0) : '?' }}
             </span>
           </div>
-          <span class="student-name">{{ student.name }}</span>
+          <span class="student-name">{{ student?.name }}</span>
         </div>
 
         <button class="invite-btn">Invite</button>
       </div>
+
+      <!-- fallback row if no classmates in this session -->
+      <div class="student-row empty-row" *ngIf="
+          (
+            selectedSubTab === 'theory'
+              ? (cur.theory?.students?.length || 0)
+              : (cur.practical?.students?.length || 0)
+          ) === 0
+        ">
+        <div class="student-meta">
+          <span class="student-name">
+            No classmates found yet for this session
+          </span>
+        </div>
+      </div>
     </div>
   </section>
-
 </div>
 
 <!-- EMPTY STATE WHEN NO COURSES -->

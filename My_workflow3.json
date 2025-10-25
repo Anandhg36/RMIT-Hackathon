@@ -1,0 +1,271 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assignments-question",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        16
+      ],
+      "id": "4a48686e-7c26-47c9-b5bf-42e12c7b4b2d",
+      "webhookId": "90e98634-e4c4-4230-8697-d0f9469dc4f4"
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "requestMethod": "POST",
+        "url": "={{'https://schisvtipbmfentvbtcc.supabase.co/rest/v1/rpc/sql'}}",
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "json",
+          "fullResponse": false,
+          "useQueryString": false
+        },
+        "bodyParametersJson": "={\n  \"query\": \"{{$json['message']['content']}}\"\n}\n",
+        "headerParametersJson": "{\n  \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjaGlzdnRpcGJtZmVudHZidGNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyODkzNTQsImV4cCI6MjA3Njg2NTM1NH0.1kwyflLWAoYMcOHNDggX5f9Jm3OAj9b_JeoAw49GbvE\",\n  \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjaGlzdnRpcGJtZmVudHZidGNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyODkzNTQsImV4cCI6MjA3Njg2NTM1NH0.1kwyflLWAoYMcOHNDggX5f9Jm3OAj9b_JeoAw49GbvE\",\n  \"Content-Type\": \"application/json\"\n}",
+        "queryParametersJson": "{}"
+      },
+      "name": "Supabase Query",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        16
+      ],
+      "id": "10cef3c2-13d8-49af-91d1-27caa2671fa0",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HEjlayAwowhvikeA",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=={{$json[\"body\"][\"question\"]}}"
+            },
+            {
+              "content": "You are an academic AI assistant that generates PostgreSQL queries based on a student’s natural-language question.\n\nYou are connected to an academic database with the following schema:\n\nTable: assignments\n- assignment_id (integer)\n- assignment_name (text)\n- course_id (integer)\n- course_name (text)\n- user_id (integer)\n- due_date (date)\n- points_possible (integer)\n- submission_types (text)\n- created_at (timestamp)\n\nTable: courses\n- course_id (bigint)\n- created_at (timestamp)\n- email (text)\n- course_name (text)\n- user_id (bigint)\n- start_at (text)\n- end_at (text)\n- apply_assignment_group_weights (boolean)\n- course_code (text)\nTable: course_timetable\n- course_id (bigint)\n- created_at (timestamp)\n- user_id (bigint)\n- day_of_course (text)\n- time_of_day (text)\n- room_of_course (text)\n- course_name (text)\n- is_theory (boolean)\nThe `assignments` table links to the `courses` table through `course_id`, and both link to users through `user_id`.\n---\n\n### Your task:\nWhen a student asks a question, generate a **complete SQL query** that can be executed directly on PostgreSQL.\n\n### Guidelines:\n- Use **PostgreSQL syntax** only.\n- Always use **lowercase table and column names**.\n- Include **JOINs** where needed (e.g., to show course_name with assignments).\n- Use **`LIKE`** for partial text matches.\n- Use **date filters** when students mention time frames (e.g., “this week,” “past 7 days”).\n- Return **clean SQL only** — no explanations, no markdown.\n- Default all date references to `current_date` when unspecified.\n- Example:  \n  “Show me assignments due this week for usability course”  \n  ➜\n  ```sql\n  SELECT a.assignment_name, a.due_date, c.course_name\n  FROM assignments a\n  JOIN course c ON a.course_id = c.course_id\n  WHERE c.course_name ILIKE '%usability%'\n  AND a.due_date BETWEEN current_date AND current_date + interval '7 days';\nRules:\n- Output SQL in a single line (no line breaks, markdown, or backticks).\n- No semicolon needed",
+              "role": "system"
+            },
+            {
+              "content": "=user_id ={{$json[\"body\"][\"user_id\"]}}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -624,
+        16
+      ],
+      "id": "197f7445-e6d7-492b-b71a-95bd53902db6",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ON0HbJk6K4kwgbWN",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json.message}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        720,
+        0
+      ],
+      "id": "b56ad352-6070-459f-b58b-efff81ea60c2",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const nestedArray = items[0].json; // your input\n\nconst wrappedJson = {\n    data: nestedArray\n};\n\nreturn wrappedJson;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        288
+      ],
+      "id": "aa4823b1-a358-4d75-ae20-7aa6430c9591",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6c28133e-8ef2-4af4-82c3-17f74a9162ed",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract input array\n//const input = items[0].json;\n\n// The first element has question\nconst question = $input.first().json.body.question;\n\n// The second element has SQL query results\nconst queryResults =  items[1].json;\n// Construct a single combined object\nreturn [{\n  json: {\n    question: question,\n    results: queryResults\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9f7468f7-cbc2-4ac8-992d-a86e79faf12b",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=User question: {{ $json.question }}\nAssignments data: {{ JSON.stringify($json.results) }}\nWrite a concise and natural reply suitable for a chat message."
+            },
+            {
+              "content": "You are an assistant that summarizes assignment data for students. \nYou receive a user question and a list of assignments from SQL. \nCreate a clear, conversational reply based on the question.",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ace2451d-323c-4280-a990-9aaeb1023bac",
+      "name": "Convert to text again",
+      "credentials": {
+        "openAiApi": {
+          "id": "ON0HbJk6K4kwgbWN",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Query": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Supabase Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Convert to text again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to text again": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e2e993c7-1b4a-406c-a506-3d256920e28e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cfb684fb1c562deb3927353e10df2af018a52b1292f6b4565a73ee600c5b345d"
+  },
+  "id": "pzEMSSWPpmwAqV3S",
+  "tags": []
+}
