@@ -85,9 +85,14 @@ async def signup_user(email: str ,password : str):
         print(existing_user.data)
         # Get user id from User table
         USER_ID = supabase.table("User").select("user_id").eq("email", email).eq("password", password).execute().data[0]
+        orchestrate_load()
+        return USER_ID
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+def orchestrate_load():
+    course_list = get_courses()
+    ### DO for assignments
+    get_assignments(course_list)
 def get_user_details():
     try:
         result = supabase.table("User").select("api_token").eq("user_id", USER_ID).execute()
@@ -107,7 +112,7 @@ def get_courses():
     api_token = get_user_details()
 
     # Step 2: Use the token to call an API (example Canvas API endpoint)
-    API_URL_COURSES = "https://rmit.instructure.com/api/v1/courses"  # Example
+    API_URL_COURSES = "https://rmit.instructure.com/api/v1/courses"  
     result_email = ((supabase.table("User").select("email").eq("user_id", USER_ID).execute()).data)[0]
     headers = {
         "Authorization": f"Bearer {api_token}",
@@ -139,13 +144,12 @@ def get_courses():
         print(filtered_courses)
 
         insert_result = supabase.table("courses").insert(filtered_courses).execute()
-
         course_list = [c.get("id") for c in courses]
-        get_assignments(course_list)
         if insert_result.data:
             print(f"Successfully inserted {len(insert_result.data)} course records into Supabase!")
         else:
             print("Insert executed but no data returned (check table or constraints).")
+        return(course_list)
     except requests.exceptions.RequestException as e:
         print("Error calling API:", e)
 
@@ -195,8 +199,6 @@ def get_user_courses(user_id: int):
 
         if not response.data:
             raise HTTPException(status_code=404, detail=f"No courses found for user_id {user_id}")
-        
-
 
         # Filter and rename fields for response
         filtered_courses = [
@@ -211,9 +213,6 @@ def get_user_courses(user_id: int):
             }
             for course in response.data
         ]
-        existing_in_table = (supabase.table("course_timetable").select("course_id", "user_id").eq("user_id", req.user_id).eq("course_id", req.course_id)
-        .execute())
-        print(existing_in_table.data)
         # if not existing_in_table.data:
         return filtered_courses
 
@@ -326,45 +325,57 @@ async def find_classmate(requests: List[ClassmateRequest]):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/find_classmate_now")
-async def find_classmate(user_id : int):
-    ### GET SAME PEOPLE FROM COURSE ###
-    # First get the courses for this user id #
-    course_match_json = []  # initialize before the loop
-    result_get_user_course = supabase.table("course_timetable").select("course_id","day_of_course","time_of_day","room_of_course","course_name","is_theory")\
-    .eq("user_id", user_id).execute()
+async def find_classmate_now(user_id : int):
+    try:
+        ### GET SAME PEOPLE FROM COURSE ###
+        # First get the courses for this user id #
+        course_match_json = []  # initialize before the loop
+        result_get_user_course = supabase.table("course_timetable").select("course_id","day_of_course","time_of_day","room_of_course","course_name","is_theory")\
+        .eq("user_id", user_id).execute()
 
-    if not result_get_user_course.data:
-        raise HTTPException(status_code=400, detail="User doesnt exist in course timetable table!! Please insert")
-    
-    for res in result_get_user_course.data:
-        course_id = res['course_id']
-        day_of_course=res['day_of_course']
-        time_of_day=res['time_of_day']
-        room_of_course=res['room_of_course']
-        is_theory=res['is_theory']
+        if not result_get_user_course.data:
+            raise HTTPException(status_code=400, detail="User doesnt exist in course timetable table!! Please insert")
+        print(result_get_user_course.data)
+        for res in result_get_user_course.data:
+            course_id = res['course_id']
+            day_of_course=res['day_of_course']
+            time_of_day=res['time_of_day']
+            room_of_course=res['room_of_course']
+            is_theory=res['is_theory']
 
-        result_same_time = supabase.table("course_timetable").select("course_id","user_id","day_of_course","time_of_day","room_of_course","course_name","is_theory")\
-        .eq("course_id", course_id).eq("day_of_course", day_of_course).eq("time_of_day", time_of_day).eq("room_of_course", room_of_course)\
-            .eq("is_theory", is_theory).neq("user_id", user_id).execute()
-
+            result_same_time = supabase.table("course_timetable").select("course_id","user_id","day_of_course","time_of_day","room_of_course","course_name","is_theory")\
+            .eq("course_id", course_id).eq("day_of_course", day_of_course).eq("time_of_day", time_of_day).eq("room_of_course", room_of_course)\
+                .eq("is_theory", is_theory).neq("user_id", user_id).execute()
+            
+            print(result_same_time.data)
             # If classmates exist, append them to JSON list
-        if result_same_time.data:
-            for classmate in result_same_time.data:
-                course_match_json.append({
-                    "user_id": classmate["user_id"],
-                    "course_id": classmate["course_id"],
-                    "day": classmate["day_of_course"],
-                    "time": classmate["time_of_day"],
-                    "room": classmate["room_of_course"],
-                    "course_name": classmate["course_name"],
-                    "is_theory": classmate["is_theory"]
-            })
+            if result_same_time.data:
+                for classmate in result_same_time.data:
+                    # If classmates exist get their name as well
+                    try:
+                        result_class_mate_name = supabase.table("User").select("full_name").eq("user_id", classmate["user_id"]).execute()
+                        print(result_class_mate_name.data[0]['full_name'])
+                        full_name = result_class_mate_name.data[0]['full_name']
+                        course_match_json.append({
+                            "user_id": classmate["user_id"],
+                            "user_name":full_name,
+                            "course_id": classmate["course_id"],
+                            "day": classmate["day_of_course"],
+                            "time": classmate["time_of_day"],
+                            "room": classmate["room_of_course"],
+                            "course_name": classmate["course_name"],
+                            "is_theory": classmate["is_theory"]
+                        })
+                    except Exception as e:
+                        print(e)
+            else:
+                print("No classmates for course!!!")
+        if len(course_match_json) > 0:
+            return {"message": "Classmates found successfully","count": len(course_match_json),"data": course_match_json}
         else:
-            print("No classmates for course!!!")
-    if len(course_match_json) > 0:
-        return {"message": "Classmates found successfully","count": len(course_match_json),"data": course_match_json}
-    else:
-        return {"message": "No classmates found for all courses","count": len(course_match_json),"data": course_match_json}
+            return {"message": "No classmates found for all courses","count": len(course_match_json),"data": course_match_json}
+    except Exception as e:
+        print(e)
 
     
 
