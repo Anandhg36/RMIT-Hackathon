@@ -29,8 +29,6 @@ global USER_ID
 # Initialize FastAPI app
 app = FastAPI(title="RMIT ONE - WEB")
 
-from fastapi.middleware.cors import CORSMiddleware
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:4200"],  # frontend URL
@@ -43,45 +41,30 @@ app.add_middleware(
 async def home():
     return {"message": "Welcome to RMIT ONE - WEB"}
 
-class SignupRequest(BaseModel):
-    name: str
-    email: EmailStr
-    password: str
-    api_token: str
-
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, EmailStr
-
-class SignupRequest(BaseModel):
-    name: str
-    email: EmailStr
-    password: str
-    api_token: str
 
 @app.post("/signup")
-async def signup_user(data: SignupRequest):
-    name = data.name
-    email = data.email
-    password = data.password
-    api_token = data.api_token
-
-    # Check if user already exists
-    existing_user = supabase.table("User").select("user_id").eq("email", email).execute()
-    if existing_user.data:
-        # Return proper 400 instead of being caught as 500
-        raise HTTPException(status_code=400, detail="User with this email already exists")
-
+async def signup_user(name: str, email: str, api_token: str, password: str):
     try:
-        user_id = int(str(email.split("@")[0])[1:]) if email else 0
+        # Check if user already exists
+        existing_user = supabase.table("User").select("user_id").eq("email", email).execute()
+
+        if existing_user.data:
+            raise HTTPException(status_code=400, detail="User with this email already exists")
+
+        user_id = int(str(email.split('@')[0])[1:])
+        # Insert new user
         new_user = {
             "user_id": user_id,
             "full_name": name,
             "email": email,
             "api_token": api_token,
-            "password": password,
+            "password": password
         }
+
         result = supabase.table("User").insert(new_user).execute()
+
         return {"message": "User created successfully", "data": result.data}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -248,6 +231,18 @@ class ClassmateRequest(BaseModel):
     user_id: int
 
 
+@app.post("/query")
+def n8n_vetri(Query: str):
+    url = "https://manasvinii.app.n8n.cloud/webhook-test/assignments-question"
+    payload = {
+        "question": Query
+    }
+
+    response = requests.post(url, json=payload)
+    print(response.status_code)
+    print(response.json())  # The JSON response from n8n
+
+
 @app.post("/find_classmate")
 async def find_classmate(requests: List[ClassmateRequest]):
     try:
@@ -325,14 +320,12 @@ async def find_classmate(requests: List[ClassmateRequest]):
                         "room": classmate["room_of_course"],
                         "course_name": classmate["course_name"],
                         "is_theory": classmate["is_theory"]
-                    })
+                })
             else:
                 print("No classmates for course!!!")
         if len(course_match_json) > 0:
-            return {"message": "Classmates found successfully", "count": len(course_match_json),
-                    "data": course_match_json}
+            return {"message": "Classmates found successfully","count": len(course_match_json),"data": course_match_json}
         else:
-            return {"message": "No classmates found for all courses", "count": len(course_match_json),
-                    "data": course_match_json}
+            return {"message": "No classmates found for all courses","count": len(course_match_json),"data": course_match_json}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
