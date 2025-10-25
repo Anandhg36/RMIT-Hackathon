@@ -32,28 +32,29 @@ export class SignupComponent {
     name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    canvastoken: ['', [Validators.required]],
   });
 
   get f() {
     return this.form.controls;
   }
 
-  /** Generate an API token for the user (client-side) */
-  private generateToken(): string {
-    try {
-      // modern browsers
-      // @ts-ignore - TS lib may not include randomUUID in some configs
-      if (crypto?.randomUUID) return crypto.randomUUID();
-    } catch {}
-    // fallback
-    return (
-      Math.random().toString(36).slice(2) +
-      '-' +
-      Date.now().toString(36) +
-      '-' +
-      Math.random().toString(36).slice(2)
-    ).toUpperCase();
-  }
+  // /** Generate an API token for the user (client-side) */
+  // private generateToken(): string {
+  //   try {
+  //     // modern browsers
+  //     // @ts-ignore - TS lib may not include randomUUID in some configs
+  //     if (crypto?.randomUUID) return crypto.randomUUID();
+  //   } catch {}
+  //   // fallback
+  //   return (
+  //     Math.random().toString(36).slice(2) +
+  //     '-' +
+  //     Date.now().toString(36) +
+  //     '-' +
+  //     Math.random().toString(36).slice(2)
+  //   ).toUpperCase();
+  // }
 
   onSubmit(): void {
     this.error = null;
@@ -67,8 +68,8 @@ export class SignupComponent {
     const payload = {
       name: this.f.name.value!.trim(),
       email: this.f.email.value!.trim(),
-      api_token: this.generateToken(),
       password: this.f.password.value!,
+      api_token: this.f.canvastoken.value!.trim()
     };
 
     this.loading = true;
@@ -76,11 +77,11 @@ export class SignupComponent {
     this.http
       .post<SignupResponse>(`${API_BASE}/signup`, payload)
       .subscribe({
-        next: () => {
+        next: (res) => {
+          console.log("Registration successful!")
           this.loading = false;
           this.success = true;
-          // navigate after success — change to '/dashboard' if you prefer
-          setTimeout(() => this.router.navigateByUrl('/login'), 300);
+          setTimeout(() => this.router.navigateByUrl('/login'), 500);
         },
         error: (err: HttpErrorResponse) => {
           this.loading = false;

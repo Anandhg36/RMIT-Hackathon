@@ -76,7 +76,7 @@
 .check{ display:flex; align-items:center; gap:8px; color: var(--ink-soft); font-size: 14px }
 .check input{ accent-color: var(--brand-primary) }
 
-.link{ color: var(--brand-pop); text-decoration:none }
+.link{ color: var(--brand-pop); text-decoration:none; margin-top: 8px; }
 .link:hover{ color: var(--brand-primary) }
 
 /* CTA (same as signup) */

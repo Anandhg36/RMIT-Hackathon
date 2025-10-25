@@ -26,12 +26,7 @@
         <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
           <input type="email" placeholder="Email" formControlName="email" />
           <input type="password" placeholder="Password" formControlName="password" />
-
           <div class="row between">
-            <label class="check">
-              <input type="checkbox" formControlName="remember" />
-              <span>Remember me</span>
-            </label>
             <a class="link" href="#">Forgot password?</a>
           </div>
 

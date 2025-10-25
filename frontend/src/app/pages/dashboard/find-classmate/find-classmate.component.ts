@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { RmitLoaderComponent } from '../../rmit-loader/rmit-loader.component'; // <-- adjust path if different
 
-const API_BASE = 'http://localhost:8010';
+const API_BASE = 'http://localhost:8000';
 
 interface CourseApi {
   id: number | string;
@@ -49,7 +49,7 @@ export class FindClassmateComponent implements OnInit {
     this.error = null;
 
     this.http
-      .get<CourseApi[]>(`${API_BASE}/users/${this.userId}/courses/find_classmate`)
+      .get<CourseApi[]>(`${API_BASE}/users/${this.userId}/courses`)
       .subscribe({
         next: (list) => {
           this.courses = (list ?? []).map((c) => ({

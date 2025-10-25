@@ -16,19 +16,42 @@
     <main class="form-pane">
       <section class="form-area">
         <h1>Sign Up</h1>
-        <form class="form">
-          <input type="text" placeholder="Email or Phone" />
-          <input type="text" placeholder="Full Name" />
-          <input type="password" placeholder="Password" />
-          <button type="submit" class="cta">Let’s Get Started!</button>
+        <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <input
+            type="email"
+            placeholder="Email"
+            formControlName="email"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Full Name"
+            formControlName="name"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            formControlName="password"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Canvas Token"
+            formControlName="canvastoken"
+            required
+          />
+          <p *ngIf="success" class="success-text">Registration successful!</p>
+          <p *ngIf="error" class="error-text">{{ error }}</p>
 
-          <!-- <div class="divider"><span>Or continue with</span></div>
-          <div class="social">
-            <button type="button" class="btn social-fb"><span>f</span> Facebook</button>
-            <button type="button" class="btn social-gg"><span>G</span> Google</button>
-          </div> -->
+          <button type="submit" class="cta" [disabled]="loading">
+            Let’s Get Started!
+          </button>
 
-          <p class="alt">Already a member? <a href="#">Sign In</a></p>
+          <p class="alt">
+            Already a member?
+            <a routerLink="/login">Sign In</a>
+          </p>
         </form>
       </section>
     </main>
