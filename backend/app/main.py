@@ -330,6 +330,7 @@ async def find_classmate_now(user_id : int):
         ### GET SAME PEOPLE FROM COURSE ###
         # First get the courses for this user id #
         course_match_json = []  # initialize before the loop
+        course_no_match_json = []
         result_get_user_course = supabase.table("course_timetable").select("course_id","day_of_course","time_of_day","room_of_course","course_name","is_theory")\
         .eq("user_id", user_id).execute()
 
@@ -370,13 +371,12 @@ async def find_classmate_now(user_id : int):
                         print(e)
             else:
                 print("No classmates for course!!!")
+                course_no_match_json.append({"course_id": course_id ,"day_of_course": day_of_course, "time_of_day":time_of_day , "room_of_course" : room_of_course, "is_theory" : is_theory})
         if len(course_match_json) > 0:
-            return {"message": "Classmates found successfully","count": len(course_match_json),"data": course_match_json}
+            return {"message": "Classmates found successfully","count": len(course_match_json),"data_match": course_match_json , "data_no_match" : course_no_match_json}
         else:
-            return {"message": "No classmates found for all courses","count": len(course_match_json),"data": course_match_json}
+            return {"message": "No classmates found for all courses","count": len(course_match_json),"data_match": course_match_json, "data_no_match" : course_no_match_json}
     except Exception as e:
         print(e)
-
-    
 
 
