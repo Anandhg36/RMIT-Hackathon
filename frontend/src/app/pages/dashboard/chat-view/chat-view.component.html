@@ -1,0 +1,175 @@
+<!-- SHOW LOADING -->
+<div class="courses-shell" *ngIf="loading">
+  <div class="empty-shell">
+    <div class="empty-card">
+      <p class="empty-main">Loading your courses…</p>
+      <p class="empty-sub">Please wait while we pull data from Canvas / Supabase.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SHOW ERROR -->
+<div class="courses-shell" *ngIf="!loading && error">
+  <div class="empty-shell">
+    <div class="empty-card">
+      <p class="empty-main">Couldn’t load courses</p>
+      <p class="empty-sub">{{ error }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN VIEW -->
+<div
+  class="courses-shell"
+  *ngIf="!loading && !error && courses?.length; else emptyState"
+>
+  <!-- Title -->
+  <h2 class="page-title">Your Courses</h2>
+
+  <!-- COURSE PICKER BAR -->
+<div class="course-bar-wrapper">
+  <div class="course-bar">
+    <!-- sliding highlight -->
+    <div
+      class="course-bar__active-pill"
+      [style.width.px]="TAB_WIDTH"
+      [style.transform]="'translateX(' + ((selectedIndex ?? 0) * TAB_WIDTH) + 'px)'"
+    ></div>
+
+    <!-- each tab -->
+    <button
+      class="course-tab"
+      *ngFor="let course of courses; let i = index"
+      (click)="selectCourse(i)"
+      [class.active]="selectedIndex === i"
+      [style.width.px]="TAB_WIDTH"
+      [attr.title]="course.name || ('Course ' + (i + 1))"
+    >
+      <span class="course-tab__label">
+        {{ course.name || ('Course ' + (i + 1)) }}
+      </span>
+    </button>
+  </div>
+</div>
+
+
+  <!-- INFO CARD for selected course -->
+  <section class="details-card" *ngIf="selectedIndex !== null">
+    <!-- Toggle Theory / Practical -->
+    <div class="mode-toggle">
+      <button
+        class="mode-btn"
+        [class.active]="selectedSubTab === 'theory'"
+        (click)="switchSubTab('theory')"
+      >
+        Theory
+      </button>
+      <button
+        class="mode-btn"
+        [class.active]="selectedSubTab === 'practical'"
+        (click)="switchSubTab('practical')"
+      >
+        Practical
+      </button>
+    </div>
+
+    <!-- Slide container -->
+    <div class="details-slider">
+      <div
+        class="details-track"
+        [style.transform]="
+          selectedSubTab === 'theory'
+            ? 'translateX(0)'
+            : 'translateX(-100%)'
+        "
+      >
+        <!-- THEORY PANE -->
+        <div class="details-pane">
+          <h3 class="pane-title">Theory Details</h3>
+
+          <div class="info-row">
+            <span class="label">Day:</span>
+            <span class="value">{{
+              courses[selectedIndex].theory.day || '—'
+            }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Time:</span>
+            <span class="value">{{
+              courses[selectedIndex].theory.time || '—'
+            }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Classroom:</span>
+            <span class="value">{{
+              courses[selectedIndex].theory.classroom || '—'
+            }}</span>
+          </div>
+        </div>
+
+        <!-- PRACTICAL PANE -->
+        <div class="details-pane">
+          <h3 class="pane-title">Practical Details</h3>
+
+          <div class="info-row">
+            <span class="label">Day:</span>
+            <span class="value">{{
+              courses[selectedIndex].practical.day || '—'
+            }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Time:</span>
+            <span class="value">{{
+              courses[selectedIndex].practical.time || '—'
+            }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="label">Classroom:</span>
+            <span class="value">{{
+              courses[selectedIndex].practical.classroom || '—'
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDENT LIST -->
+  <section class="students-card" *ngIf="selectedIndex !== null">
+    <div class="students-head">
+      <h3 class="students-title">Students Enrolled in this Class</h3>
+    </div>
+
+    <div class="students-scroll">
+      <div class="student-row" *ngFor="let student of dummyStudents">
+        <div class="student-meta">
+          <div class="avatar-circle">
+            <span class="avatar-initial">
+              {{ student.name ? student.name.charAt(0) : '?' }}
+            </span>
+          </div>
+          <span class="student-name">{{ student.name }}</span>
+        </div>
+
+        <button class="invite-btn">Invite</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- EMPTY STATE WHEN NO COURSES -->
+<ng-template #emptyState>
+  <div class="empty-shell">
+    <div class="empty-card">
+      <p class="empty-main">No courses yet</p>
+      <p class="empty-sub">
+        Add your timetable so we can match classmates and show session info.
+      </p>
+    </div>
+  </div>
+</ng-template>

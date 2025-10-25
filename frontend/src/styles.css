@@ -1,0 +1,123 @@
+/* ========= RMITONE — Global Dark Theme (Lavender Rose) =========
+   Palette: 231942 5e548e 9f86c0 be95c4 e0b1cb
+================================================================= */
+
+:root{
+  /* Brand */
+  --brand-primary: #9F86C0;  /* main accent on dark */
+  --brand-deep:    #5E548E;  /* hover/pressed */
+  --brand-pop:     #E0B1CB;  /* soft highlight / chips */
+
+  /* Surfaces (dark ramp) */
+  --bg:       #1B1630;       /* page background (≈ 231942 lightened) */
+  --surface:  #221B3D;       /* cards/forms */
+  --panel:    #281F4E;       /* hero panel */
+  --surface-2:#2C2458;       /* inputs */
+  --line:     rgba(224,177,203,.14); /* subtle divider */
+
+  /* Text */
+  --ink:      #F5F1FF;       /* primary text */
+  --ink-soft: #CEC8E6;       /* secondary */
+  --ink-dim:  #AFA7CF;
+
+  /* FX */
+  --shadow: 0 20px 60px rgba(0,0,0,.55);
+  --radius: 26px;
+  --radius-sm: 14px;
+}
+
+/* ===== Global base ===== */
+*{
+  box-sizing:border-box;
+}
+
+/* lock viewport and remove global scrollbar */
+html,
+body{
+  height:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden; /* <-- prevent the whole page from scrolling */
+  font-family: Poppins, Inter, system-ui, Arial, sans-serif;
+  background:
+    radial-gradient(900px 420px at 10% -10%, rgba(94,84,142,.28) 0%, transparent 60%),
+    radial-gradient(1000px 520px at 120% 120%, rgba(190,149,196,.22) 0%, transparent 65%),
+    var(--bg);
+  color: var(--ink);
+}
+
+/* hide root scrollbars in WebKit browsers just in case */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar{
+  width:0;
+  height:0;
+  display:none;
+}
+
+/* Firefox scrollbar hide hint on root (not strictly needed because overflow:hidden already stops it) */
+html{
+  scrollbar-width:none;
+}
+
+/* anchors */
+a{
+  color: var(--brand-pop);
+  text-decoration:none;
+}
+a:hover{
+  color: var(--brand-primary);
+}
+
+/* ===== Utilities usable everywhere ===== */
+.btn-primary{
+  background: linear-gradient(180deg,var(--brand-primary),var(--brand-deep));
+  color:#0F0A1E;
+  border:0;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:800;
+  box-shadow:
+    0 10px 22px rgba(159,134,192,.28),
+    inset 0 -1px 0 rgba(255,255,255,.12);
+}
+
+.btn-accent{
+  background: linear-gradient(180deg, var(--brand-pop), #cf8fb1);
+  color:#1a1430;
+  border:0;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:800;
+}
+
+.text-muted{
+  color: var(--ink-soft);
+}
+
+.surface{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+
+.input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background: var(--surface-2);
+  outline:0;
+  font-size:14px;
+  color:var(--ink);
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+
+.input::placeholder{
+  color:#BFB7DD;
+}
+
+.input:focus{
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(191,149,196,.28);
+  background:#352B66;
+}

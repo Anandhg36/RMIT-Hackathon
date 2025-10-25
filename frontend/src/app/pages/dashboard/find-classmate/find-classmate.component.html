@@ -1,0 +1,63 @@
+<div class="form-container">
+  <h2>Enter Your Course Details</h2>
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="loading">
+    <rmit-loader
+      [overlay]="false"
+      size="56"
+      color="#5E548E"
+      label="Loading courses">
+    </rmit-loader>
+    <p class="hint">Loading course list…</p>
+  </div>
+
+  <!-- Scrollable form area -->
+  <div class="scroll-area" *ngIf="!loading">
+    <form (ngSubmit)="saveDetails()">
+      <div *ngFor="let course of courses; let i = index">
+        <div *ngIf="course.end_at" class="course-block">
+          <h3>{{ course.name }} ({{ course.course_code }})</h3>
+
+          <div class="course-partition">
+            <!-- Theory -->
+            <div class="section theory">
+              <h4>Theory</h4>
+   <select [(ngModel)]="course.theory.day" name="theoryDay{{ i }}">
+  <option value="" disabled selected>Select day</option>
+  <option *ngFor="let d of daysOfWeek" [value]="d">{{ d }}</option>
+</select>
+              <input type="text"
+                     [(ngModel)]="course.theory.time"
+                     name="theoryTime{{ i }}"
+                     placeholder="Time" />
+              <input type="text"
+                     [(ngModel)]="course.theory.classroom"
+                     name="theoryClassroom{{ i }}"
+                     placeholder="Classroom" />
+            </div>
+
+            <!-- Practical -->
+            <div class="section practical">
+              <h4>Practical</h4>
+<select [(ngModel)]="course.practical.day" name="practicalDay{{ i }}">
+  <option value="" disabled selected>Select day</option>
+  <option *ngFor="let d of daysOfWeek" [value]="d">{{ d }}</option>
+</select>
+              <input type="text"
+                     [(ngModel)]="course.practical.time"
+                     name="practicalTime{{ i }}"
+                     placeholder="Time" />
+              <input type="text"
+                     [(ngModel)]="course.practical.classroom"
+                     name="practicalClassroom{{ i }}"
+                     placeholder="Classroom" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="save-btn">Save</button>
+    </form>
+  </div>
+</div>

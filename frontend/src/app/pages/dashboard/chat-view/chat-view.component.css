@@ -1,0 +1,525 @@
+/************************************
+  ROOT LAYOUT + PALETTE TOKENS
+  (scoped via .courses-shell so we don't leak styles)
+*************************************/
+.courses-shell {
+  /* brand colors */
+  --brand-primary: #5e548e;
+  --brand-accent: #9f86c0;
+  --brand-pop: #e0b1cb;
+
+  /* text colors */
+  --ink-main: #1a142b;
+  --ink-soft: #4a415f;
+  --ink-dim: rgba(26, 20, 43, 0.6);
+
+  /* frosted glass-ish background for cards */
+  --panel-bg: radial-gradient(
+      circle at 0% 0%,
+      rgba(224, 177, 203, 0.18) 0%,
+      rgba(255, 255, 255, 0) 70%
+    ),
+    rgba(255, 255, 255, 0.6);
+
+  --border-col: rgba(94, 84, 142, 0.18);
+  --shadow-card: 0 30px 60px rgba(24, 16, 52, 0.12);
+
+  /* pill chips */
+  --pill-bg: rgba(255, 255, 255, 0.55);
+  --pill-border: rgba(94, 84, 142, 0.22);
+  --pill-text: #1a142b;
+
+  /* active gradient (purple → pink glow) */
+  --grad-active: radial-gradient(
+      circle at 0% 0%,
+      rgba(224, 177, 203, 0.5) 0%,
+      rgba(224, 177, 203, 0) 70%
+    ),
+    linear-gradient(
+      135deg,
+      var(--brand-accent) 0%,
+      var(--brand-primary) 50%,
+      var(--brand-pop) 100%
+    );
+
+  max-width: 1200px;     /* page width inside main content area */
+  margin: 24px auto 56px;
+  padding: 0 16px 40px;
+  color: var(--ink-main);
+  text-align: center;
+}
+
+/************************************
+  PAGE TITLE
+*************************************/
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 16px;
+  color: var(--ink-main);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/************************************
+  COURSE PICKER BAR
+*************************************/
+.course-bar-wrapper {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.course-bar {
+  position: relative;
+  display: flex;
+  max-width: 1100px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  border-radius: 14px;
+  padding: 4px;
+
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    0 20px 40px rgba(24, 16, 52, 0.07);
+}
+.course-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* The glowing purple bar that sits under the selected tab */
+.course-bar__active-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  border-radius: 10px;
+  background: var(--grad-active);
+  box-shadow:
+    0 10px 24px rgba(94, 84, 142, 0.45),
+    0 0 14px rgba(224, 177, 203, 0.6) inset;
+  transition: transform 0.18s ease, width 0.18s ease;
+  z-index: 1;
+}
+
+/* each course "tab" */
+.course-bar button {
+  flex: 0 0 auto;
+  appearance: none;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+
+  min-width: max-content;
+  max-width: 260px;            /* limit how wide a long course name can get */
+  padding: 10px 14px;
+
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--pill-text);
+  position: relative;
+  z-index: 2;
+
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;     /* add "..." for long course titles */
+
+  transition: color 0.15s ease;
+}
+
+.course-bar button.active {
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+/************************************
+  CARD BASE STYLE (frosted glass look)
+  We'll reuse for both .details-card and .students-card,
+  then size/override each differently.
+*************************************/
+.details-card,
+.students-card {
+  background: var(--panel-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-col);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  color: var(--ink-main);
+  text-align: left;
+  margin: 0 auto 24px;
+  padding-top: 0;
+  max-width: 1100px;
+  width: 100%;
+}
+
+/************************************
+  DETAILS CARD (Theory / Practical)
+  - This is the "summary" card on top
+  - Make it narrower and tighter
+*************************************/
+.details-card {
+  max-width: 90%;      
+  width: 100%;
+  margin: 0 auto 16px;  
+}
+
+/* small top toggle bar */
+.mode-toggle {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+
+  margin: 12px auto 8px;
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  border-radius: 10px;
+  padding: 4px;
+  width: max-content;
+
+  transform: scale(0.95);            /* subtle shrink */
+  transform-origin: center;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    0 16px 32px rgba(24, 16, 52, 0.07);
+}
+
+.mode-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 8px 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.mode-btn.active {
+  background: var(--grad-active);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 10px 22px rgba(94, 84, 142, 0.45),
+    0 0 12px rgba(224, 177, 203, 0.55) inset;
+}
+
+/* sliding content area in the details card */
+.details-slider {
+  overflow: hidden;
+  border-top: 1px solid var(--border-col);
+  border-radius: 0 0 16px 16px;
+}
+
+.details-track {
+  display: flex;
+  width: 200%;
+  transition: transform 0.18s ease;
+}
+
+/* each pane is half-width of track → 50% */
+.details-pane {
+  flex: 0 0 50%;
+  padding: 16px 20px 20px; /* tightened from default */
+  box-sizing: border-box;
+}
+
+.pane-title {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink-main);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.info-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.label {
+  font-weight: 600;
+  margin-right: 6px;
+  color: var(--ink-main);
+  font-size: 13px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.value {
+  font-weight: 500;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+/************************************
+  STUDENTS CARD
+  - This is the main/hero block now
+  - Wider, taller scroll area
+*************************************/
+.students-card {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto 28px;
+  padding-top: 0;
+}
+
+/* header row on the students card */
+.students-head {
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border-col);
+}
+
+.students-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink-main);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+/* scrollable list of classmates */
+.students-scroll {
+  max-height: 320px;          /* taller than the first version */
+  overflow-y: auto;
+  padding: 12px 16px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-accent) transparent;
+}
+.students-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.students-scroll::-webkit-scrollbar-thumb {
+  background: var(--brand-accent);
+  border-radius: 10px;
+}
+.students-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* a single row in the roster */
+.student-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-col);
+  border-radius: 12px;
+  box-shadow:
+    0 10px 20px rgba(24, 16, 52, 0.07),
+    inset 0 1px 1px rgba(255, 255, 255, 0.85);
+
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink-main);
+}
+.student-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.student-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* the little gradient circle avatar w/ initial */
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--grad-active);
+  box-shadow:
+    0 10px 22px rgba(94, 84, 142, 0.45),
+    0 0 10px rgba(224, 177, 203, 0.55) inset;
+
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+.avatar-initial {
+  line-height: 1;
+}
+
+.student-name {
+  color: var(--ink-main);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/************************************
+  INVITE BUTTON
+*************************************/
+.invite-btn {
+  appearance: none;
+  cursor: pointer;
+  border: 0;
+  border-radius: 8px;
+
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 600;
+  padding: 8px 12px;
+  color: #fff;
+
+  background: var(--grad-active);
+  box-shadow:
+    0 8px 18px rgba(94, 84, 142, 0.45),
+    0 0 10px rgba(224, 177, 203, 0.55) inset;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+.invite-btn:hover {
+  filter: brightness(1.07);
+}
+
+/************************************
+  FOOTER ACTION (Reset button)
+*************************************/
+.footer-actions {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.ghost-btn {
+  appearance: none;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 10px;
+  border: 1px solid var(--pill-border);
+
+  color: var(--ink-main);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 10px 14px;
+
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    0 14px 28px rgba(24, 16, 52, 0.07);
+  transition: background 0.15s ease;
+}
+.ghost-btn:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/************************************
+  EMPTY / LOADING STATES
+*************************************/
+.empty-shell {
+  max-width: 900px;
+  margin: 72px auto;
+  padding: 0 16px;
+  text-align: center;
+  color: var(--ink-main);
+}
+
+.empty-card {
+  background: var(--panel-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-col);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 32px 20px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.empty-main {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-main);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.empty-sub {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/************************************
+  RESPONSIVE TWEAKS
+*************************************/
+@media (max-width: 900px) {
+  /* let the details card grow again on smaller screens,
+     so it doesn't get too skinny */
+  .details-card {
+    width: 80%;
+    max-width: 600px;
+  }
+  .students-card {
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .course-bar button {
+    font-size: 13px;
+    padding: 8px 10px;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .details-card {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto 16px;
+  }
+
+  .students-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .pane-title {
+    font-size: 14px;
+  }
+
+  .info-row {
+    font-size: 13px;
+  }
+
+  .student-row {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .invite-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .avatar-circle {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+}

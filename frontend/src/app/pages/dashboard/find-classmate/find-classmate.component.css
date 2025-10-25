@@ -1,0 +1,175 @@
+/* outer card */
+.form-container {
+  max-width: 880px;
+  margin: 2rem auto;
+  padding: 1.5rem 1.5rem 1rem;
+  background-color: #faf8ff;
+  border-radius: 8px;
+  box-shadow:
+    0 24px 48px rgba(94, 84, 142, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(94, 84, 142, 0.15);
+  color: #2a1c55;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 4rem); /* keep container on screen */
+}
+
+/* title stays visible */
+.form-container > h2 {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a133a;
+  margin: 0 0 1rem 0;
+}
+
+/* scroll region for all course blocks */
+.scroll-area {
+  flex: 1;                /* take remaining height in the card */
+  min-height: 0;          /* flexbox trick: allows this child to scroll */
+  overflow-y: auto;       /* <-- vertical scroll lives HERE */
+  padding-right: 0.5rem;  /* keep text away from scrollbar edge */
+}
+
+/* optional: pretty scrollbar */
+.scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-area::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.05);
+  border-radius: 999px;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(94,84,142,0.4);
+  border-radius: 999px;
+}
+.scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(94,84,142,0.6);
+}
+
+/* each course block card */
+.course-block {
+  background: #fff;
+  border: 1px solid rgba(94, 84, 142, 0.18);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+}
+
+.course-block h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a133a;
+  margin-bottom: 1rem;
+}
+
+/* layout for theory / practical side by side */
+.course-partition {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit,minmax(min(320px,100%),1fr));
+}
+
+/* column card (theory/practical) */
+.section {
+  border: 1px solid rgba(94, 84, 142, 0.2);
+  background: #f7f4ff;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.section h4 {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4c3a7a;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+/* shared field styles: input and select should match */
+.section input[type="text"],
+.section select {
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid rgba(94, 84, 142, 0.35);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #2a1c55;
+  outline: none;
+  display: block;
+  background-color: #fff;
+  margin-bottom: 0.75rem;
+  font-family: inherit;
+  background-clip: padding-box;
+}
+
+/* placeholder text color for inputs */
+.section input[type="text"]::placeholder {
+  color: #8d79b7;
+  font-weight: 400;
+}
+
+/* custom dropdown arrow for <select> */
+.section select {
+  /* remove default OS arrow style for consistency */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, #8d79b7 50%),
+    linear-gradient(135deg, #8d79b7 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 2rem; /* make space for arrow */
+  color: #2a1c55;
+}
+
+/* on focus */
+.section input[type="text"]:focus,
+.section select:focus {
+  border-color: #5e548e;
+  box-shadow: 0 0 0 3px rgba(94,84,142,0.18);
+}
+
+/* Save button */
+.save-btn {
+  display: inline-block;
+  background: radial-gradient(circle at 20% 20%, #e0b1cb 0%, #5e548e 80%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow:
+    0 16px 32px rgba(94,84,142,.3),
+    0 4px 12px rgba(0,0,0,.15);
+  cursor: pointer;
+}
+
+.save-btn:active {
+  transform: scale(.98);
+}
+
+/* loader text */
+.loading {
+  text-align: center;
+  color: #4c3a7a;
+  font-size: 0.9rem;
+}
+
+.loading .hint {
+  margin-top: 0.5rem;
+  color: #6b5a99;
+  font-size: 0.8rem;
+}

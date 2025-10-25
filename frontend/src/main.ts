@@ -1,11 +1,19 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter, Routes } from '@angular/router';
+import { bootstrapApplication, provideClientHydration } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
+import { provideRouter } from '@angular/router';
+import { routes } from './app/app.routes';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
-const routes: Routes = [
-  { path: '', loadComponent: () => import('./app/app.component').then(m => m.AppComponent) }
-];
+const authInterceptor = (req: any, next: any) => {
+  const token = localStorage.getItem('token');
+  if (token) req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` }});
+  return next(req);
+};
 
 bootstrapApplication(AppComponent, {
-  providers: [provideRouter(routes)],
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideClientHydration(),
+  ]
 }).catch(err => console.error(err));

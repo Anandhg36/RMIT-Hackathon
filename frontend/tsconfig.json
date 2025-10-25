@@ -1,16 +1,13 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
-    "downlevelIteration": true,
-    "outDir": "./out-tsc",
-    "forceConsistentCasingInFileNames": true,
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "node",
+    "useDefineForClassFields": false,
     "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "noImplicitAny": false,
+    "baseUrl": "./"
   }
 }
