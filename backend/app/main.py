@@ -25,7 +25,7 @@ except Exception as e:
 
 
 # Hardcoded user_id (replace with actual user ID)
-USER_ID = 4190959
+global USER_ID
 
 # Initialize FastAPI app
 app = FastAPI(title="RMIT ONE - WEB")
@@ -68,6 +68,7 @@ async def signup_user(name: str, email: str, api_token: str ,password : str):
 
 @app.post("/login")
 async def signup_user(email: str ,password : str):
+    global USER_ID
     try:
         # Check if user already exists
         existing_user = supabase.table("User").select("user_id").eq("email", email).execute()
@@ -82,7 +83,8 @@ async def signup_user(email: str ,password : str):
             raise HTTPException(status_code=400, detail="Email or password is wrong!! Please try logging in again!!!")
 
         print(existing_user.data)
-
+        # Get user id from User table
+        USER_ID = supabase.table("User").select("user_id").eq("email", email).eq("password", password).execute().data[0]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -138,16 +140,48 @@ def get_courses():
 
         insert_result = supabase.table("Courses").insert(filtered_courses).execute()
 
+        course_list = [c.get("id") for c in courses]
+        get_assignments(course_list)
         if insert_result.data:
             print(f"Successfully inserted {len(insert_result.data)} course records into Supabase!")
         else:
             print("Insert executed but no data returned (check table or constraints).")
-
     except requests.exceptions.RequestException as e:
         print("Error calling API:", e)
 
     except Exception as e:
         print("Error inserting data into Supabase:", e)
+
+def get_assignments(course_list):
+    api_token = get_user_details()
+    headers = {"Authorization": f"Bearer {api_token}", "Accept": "application/json"}
+    for course_id in course_list:
+        API_URL = f"https://rmit.instructure.com/api/v1/courses/{course_id}/assignments"
+        try:
+            response = requests.get(API_URL, headers=headers)
+            response.raise_for_status()
+            assignments = response.json()
+            print(f"Assignments fetched successfully for course {course_id}")
+
+            filtered_assignments = [
+                {
+                    "assignment_id": a.get("id"),
+                    "course_id": course_id,
+                    "assignment_name": a.get("name"),
+                    "due_at": a.get("due_at"),
+                    "created_at": a.get("created_at"),
+                    "points_possible": a.get("points_possible"),
+                    "submission_types": a.get("submission_types"),
+                    "user_id": USER_ID
+                }
+                for a in assignments
+            ]
+
+            insert_result = supabase.table("Assignments").insert(filtered_assignments).execute()
+            print(f"Inserted {len(insert_result.data)} assignments into Supabase!")
+
+        except Exception as e:
+            print("Error fetching/inserting assignments:", e)
 
 
 @app.get("/users/{user_id}/courses")
